@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    // Environment setup & latest features
+    "target": "ES2022",
+    "module": "ESNext",
+    "outDir": "dist",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    /** @jsxImportSource hono/jsx */
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "paths": {
+      "@/env": ["./src/config/env.ts"],
+      "@/db": ["./src/db/db.ts"]
+    }
+  }
+}
