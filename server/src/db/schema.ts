@@ -28,7 +28,7 @@ import { boolean, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm
 
 // 👤 USERS
 //
-export const users = pgTable("users", {
+export const UserSchema = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -41,7 +41,7 @@ export const users = pgTable("users", {
 //
 // 💬 CHATS
 //
-export const chats = pgTable("chats", {
+export const ChatSchema  = pgTable("chats", {
   id: uuid("id").defaultRandom().primaryKey(),
   isGroup: boolean("is_group").default(false).notNull(),
   name: text("name"), // group name (nullable for 1-1)
@@ -51,16 +51,16 @@ export const chats = pgTable("chats", {
 //
 // 👥 CHAT MEMBERS (many-to-many)
 //
-export const chatMembers = pgTable(
+export const ChatMembersSchema = pgTable(
   "chat_members",
   {
     chatId: uuid("chat_id")
       .notNull()
-      .references(() => chats.id, { onDelete: "cascade" }),
+      .references(() => ChatSchema.id, { onDelete: "cascade" }),
 
     userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => UserSchema.id, { onDelete: "cascade" }),
 
     role: text("role").default("member").notNull(), // admin | member
     joinedAt: timestamp("joined_at").defaultNow().notNull(),
@@ -73,16 +73,16 @@ export const chatMembers = pgTable(
 //
 // 📩 MESSAGES
 //
-export const messages = pgTable("messages", {
+export const MessagesSchema = pgTable("messages", {
   id: uuid("id").defaultRandom().primaryKey(),
 
   chatId: uuid("chat_id")
     .notNull()
-    .references(() => chats.id, { onDelete: "cascade" }),
+    .references(() => ChatSchema.id, { onDelete: "cascade" }),
 
   senderId: uuid("sender_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => UserSchema.id, { onDelete: "cascade" }),
 
   content: text("content"), // nullable for media
   type: text("type").default("text").notNull(), // text | image | file
@@ -95,16 +95,16 @@ export const messages = pgTable("messages", {
 //
 // 👁️ MESSAGE READS (read receipts)
 //
-export const messageReads = pgTable(
+export const MessageReadsSchema = pgTable(
   "message_reads",
   {
     messageId: uuid("message_id")
       .notNull()
-      .references(() => messages.id, { onDelete: "cascade" }),
+      .references(() => MessagesSchema.id, { onDelete: "cascade" }),
 
     userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => UserSchema.id, { onDelete: "cascade" }),
 
     readAt: timestamp("read_at").defaultNow().notNull(),
   },

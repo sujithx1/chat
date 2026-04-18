@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 import { Context } from "hono";
+import { Pretty_Error } from "../../config/error";
 import { db } from "../../db";
-import { users } from "../../db/schema";
+import { UserSchema } from "../../db/schema";
 import { comparePassword } from "../../hash";
 import { signToken } from "../../jwt";
 import { loginSchema } from "../../modules/auth-schema";
-import { Pretty_Error } from "../../config/error";
 
 
 
@@ -18,9 +18,9 @@ export const LoginUserController = async (c: Context) => {
 
     const  { email, password } = parsed.data
     const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
+      .select({id:UserSchema.id,name:UserSchema.name,email:UserSchema.email,password:UserSchema.password})
+      .from(UserSchema)
+      .where(eq(UserSchema.email, email));
 
     if (!user) {
       return c.json({ message: "Invalid credentials" }, 400);

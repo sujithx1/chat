@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { Context } from "hono";
 import { Pretty_Error } from "../../config/error";
 import { db } from "../../db";
-import { users } from "../../db/schema";
+import { UserSchema } from "../../db/schema";
 import { hashPassword } from "../../hash";
 import { signToken } from "../../jwt";
 import { registerSchema } from "../../modules/auth-schema";
@@ -20,8 +20,8 @@ export const register = async (c: Context) => {
     // check existing user
     const existing = await db
       .select()
-      .from(users)
-      .where(eq(users.email, email));
+      .from(UserSchema)
+      .where(eq(UserSchema.email, email));
 
     if (existing.length) {
       return c.json({ message: "User already exists" }, 400);
@@ -30,7 +30,7 @@ export const register = async (c: Context) => {
     const hashed = await hashPassword(password);
 
     const [user] = await db
-      .insert(users)
+      .insert(UserSchema)
       .values({
         ...parsed.data,
         password: hashed,

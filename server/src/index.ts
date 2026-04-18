@@ -1,11 +1,21 @@
+import { InferInsertModel } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { errorHandler } from './middleware/error-middleware';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { UserSchema } from './db/schema';
+import { errorHandler } from './middleware/error-middleware';
 import { api } from './router';
+export type userTypes=InferInsertModel<typeof UserSchema>
+type Env = {
+  Variables: {
+    user: userTypes;
+  };
+};
 
-
-const app = new Hono()
+export const HonoCtxKey = {
+  AuthUser: 'user',
+};
+const app = new Hono<Env>()
 
 app.use(logger())
 app.use("*",cors())
