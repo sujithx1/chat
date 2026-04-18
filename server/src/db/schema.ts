@@ -29,7 +29,7 @@ import { boolean, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm
 // 👤 USERS
 //
 export const UserSchema = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
@@ -42,7 +42,7 @@ export const UserSchema = pgTable("users", {
 // 💬 CHATS
 //
 export const ChatSchema  = pgTable("chats", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
   isGroup: boolean("is_group").default(false).notNull(),
   name: text("name"), // group name (nullable for 1-1)
   createdAt: timestamp("created_at").defaultNow().notNull(),

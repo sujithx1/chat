@@ -38,7 +38,9 @@ export const authMiddleware=async (c: Context, next: Next) => {
 export const getAuthContext = (c: Context) => {
  
   const val=c.get(HonoCtxKey.AuthUser)
-  if(!val) return c.json({ message: "User not found" }, 401);
-  return val as userTypes
+  if (!val) {
+    throw new Error('Auth user not found in context');
+  } 
+   return val as userTypes
 
 };
