@@ -1,5 +1,5 @@
 // src/db/schema.ts
-import { boolean, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 // export const users = pgTable("users", {
 //   id: uuid("id").defaultRandom().primaryKey(),
@@ -25,6 +25,8 @@ import { boolean, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm
 //   createdAt: timestamp("created_at").defaultNow(),
 // });
 
+
+export const messageTypeEnums=pgEnum("message_type", ["text", "image", "video", "audio", "file"]);
 
 // 👤 USERS
 //
@@ -74,7 +76,7 @@ export const ChatMembersSchema = pgTable(
 // 📩 MESSAGES
 //
 export const MessagesSchema = pgTable("messages", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id").notNull().defaultRandom().primaryKey(),
 
   chatId: uuid("chat_id")
     .notNull()
@@ -85,7 +87,7 @@ export const MessagesSchema = pgTable("messages", {
     .references(() => UserSchema.id, { onDelete: "cascade" }),
 
   content: text("content"), // nullable for media
-  type: text("type").default("text").notNull(), // text | image | file
+  type: messageTypeEnums("type").default("text").notNull(), // text | image | file
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at"),

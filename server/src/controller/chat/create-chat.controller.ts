@@ -1,4 +1,4 @@
-import { eq, getTableColumns } from "drizzle-orm";
+import { eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { Context } from "hono";
 import z from "zod";
 import { Pretty_Error } from "../../config/error";
@@ -29,36 +29,45 @@ export const createChatController =async (c: Context) => {
     }
 
     // 🔍 Check if chat already exists (1–1)
-    const existing = await db
-      .select({
-        chatId: ChatMembersSchema.chatId,
-      })
-      .from(ChatMembersSchema)
-      .where(eq(ChatMembersSchema.userId, currentUserId));
+    const existingChat = await db
+  .select({
+    chatId: ChatMembersSchema.chatId,
+  })
+  .from(ChatMembersSchema)
+  .innerJoin(ChatSchema, eq(ChatMembersSchema.chatId, ChatSchema.id))
+  .where(
+    inArray(ChatMembersSchema.userId, [currentUserId, targetUserId])
+  )
+  .groupBy(ChatMembersSchema.chatId)
+  .having(sql`
+    COUNT(DISTINCT ${ChatMembersSchema.userId}) = 2
+    AND BOOL_AND(${ChatSchema.isGroup} = false)
+  `);
 
-    let existingChatId: string | null = null;
+if (existingChat.length) {
+  return c.json({ chatId: existingChat[0].chatId });
+}
 
-    for (const chat of existing) {
-      const members = await db
-        .select(getTableColumns(ChatMembersSchema))
-        .from(ChatMembersSchema)
-        .where(eq(ChatMembersSchema.chatId, chat.chatId));
+    //FIXME:  this code i need to change
+    // for (const chat of existing) {
+    //   const members = await db
+    //     .select(getTableColumns(ChatMembersSchema))
+    //     .from(ChatMembersSchema)
+    //     .where(eq(ChatMembersSchema.chatId, chat.chatId));
 
-      const userIds = members.map((m) => m.userId);
+    //   const userIds = members.map((m) => m.userId);
 
-      if (
-        userIds.length === 2 &&
-        userIds.includes(currentUserId) &&
-        userIds.includes(targetUserId)
-      ) {
-        existingChatId = chat.chatId;
-        break;
-      }
-    }
+    //   if (
+    //     userIds.length === 2 &&
+    //     userIds.includes(currentUserId) &&
+    //     userIds.includes(targetUserId)
+    //   ) {
+    //     existingChatId = chat.chatId;
+    //     break;
+    //   }
+    // }
 
-    if (existingChatId) {
-      return c.json({ chatId: existingChatId });
-    }
+  
 
     // 🆕 Create new chat
     const [chat] = await db
