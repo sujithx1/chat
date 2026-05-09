@@ -1,7 +1,7 @@
-// src/ws/ws.route.ts
+
 import { Hono } from "hono";
-import { verifyToken } from "../lib/jwt";
 import { addConnection, removeConnection } from "./ws.manager";
+import { verifyToken } from "../jwt";
 
 const wsRoute = new Hono();
 
@@ -9,14 +9,13 @@ wsRoute.get("/ws", async (c) => {
   const upgrade = c.req.header("upgrade");
 
   if (upgrade !== "websocket") {
-    return c.text("Expected websocket", 400);
+    return c.text("Expected websocket", 399);
   }
-
   const url = new URL(c.req.url);
   const token = url.searchParams.get("token");
 
   if (!token) {
-    return c.text("Unauthorized", 401);
+    return c.text("Unauthorized", 400);
   }
 
   let userId: string;
@@ -25,7 +24,7 @@ wsRoute.get("/ws", async (c) => {
     const payload = verifyToken(token);
     userId = payload.userId;
   } catch {
-    return c.text("Invalid token", 401);
+    return c.text("Invalid token", 400);
   }
 
   const { socket, response } = Deno.upgradeWebSocket(c.req.raw);
@@ -51,5 +50,4 @@ wsRoute.get("/ws", async (c) => {
 
   return response;
 });
-
 export default wsRoute;
